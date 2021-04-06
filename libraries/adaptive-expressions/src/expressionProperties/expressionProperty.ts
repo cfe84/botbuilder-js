@@ -102,7 +102,11 @@ export class ExpressionProperty<T> {
      */
     public tryGetValue(data: MemoryInterface | unknown): { value: T; error: Error } {
         if (!this.expression && this.expressionText) {
-            this.expression = Expression.parse(this.expressionText.replace(/^=/, ''));
+            try {
+                this.expression = Expression.parse(this.expressionText.replace(/^=/, ''));
+            } catch (error) {
+                return { value: undefined, error: error.message };
+            }
         }
 
         if (this.expression) {

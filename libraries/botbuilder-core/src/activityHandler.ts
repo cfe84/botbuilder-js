@@ -3,12 +3,19 @@
  * Licensed under the MIT License.
  */
 
-import { MessageReaction, HealthCheckResponse } from 'botframework-schema';
+import {
+    Activity,
+    AdaptiveCardInvokeResponse,
+    AdaptiveCardInvokeValue,
+    MessageReaction,
+} from 'botframework-schema';
+
 import { ActivityHandlerBase } from './activityHandlerBase';
+import { InvokeException } from './invokeException';
 import { InvokeResponse } from './invokeResponse';
-import { verifyStateOperationName, tokenExchangeOperationName, tokenResponseEventName } from './signInConstants';
 import { StatusCodes } from './statusCodes';
 import { TurnContext } from './turnContext';
+import { verifyStateOperationName, tokenExchangeOperationName, tokenResponseEventName } from './signInConstants';
 
 /**
  * Describes a bot activity event handler, for use with an [ActivityHandler](xref:botbuilder-core.ActivityHandler) object.
@@ -354,6 +361,36 @@ export class ActivityHandler extends ActivityHandlerBase {
     }
 
     /**
+     * Registers an activity event handler for the _command_ activity.
+     *
+     * @param handler The event handler.
+     *
+     * @remarks
+     * Returns a reference to the [ActivityHandler](xref:botbuilder-core.ActivityHandler) object.
+     *
+     * To handle a Command event, use the
+     * [onCommand](xref:botbuilder-core.ActivityHandler.onCommand) type-specific event handler.
+     */
+    public onCommand(handler: BotHandler): this {
+        return this.on('Command', handler);
+    }
+
+    /**
+     * Registers an activity event handler for the _CommandResult_ activity.
+     *
+     * @param handler The event handler.
+     *
+     * @remarks
+     * Returns a reference to the [ActivityHandler](xref:botbuilder-core.ActivityHandler) object.
+     *
+     * To handle a CommandResult event, use the
+     * [onCommandResult](xref:botbuilder-core.ActivityHandler.onCommandResult) type-specific event handler.
+     */
+    public onCommandResult(handler: BotHandler): this {
+        return this.on('CommandResult', handler);
+    }
+
+    /**
      * Registers an activity event handler for the _unrecognized activity type_ event, emitted for an
      * incoming activity with a type for which the [ActivityHandler](xref:botbuilder-core.ActivityHandler)
      * doesn't provide an event handler.
@@ -459,20 +496,29 @@ export class ActivityHandler extends ActivityHandlerBase {
     protected async onInvokeActivity(context: TurnContext): Promise<InvokeResponse> {
         try {
             switch (context.activity.name) {
+                case 'adaptiveCard/action': {
+                    const invokeValue = this.getAdaptiveCardInvokeValue(context.activity);
+                    const response = await this.onAdaptiveCardInvoke(context, invokeValue);
+                    return { status: response.statusCode, body: response.value };
+                }
+
                 case verifyStateOperationName:
-                case tokenExchangeOperationName: {
+                case tokenExchangeOperationName:
                     await this.onSignInInvoke(context);
                     return { status: StatusCodes.OK };
-                }
-                case 'healthCheck':
-                    return await ActivityHandler.createInvokeResponse(await this.onHealthCheck(context));
+
                 default:
-                    throw new Error('NotImplemented');
+                    throw new InvokeException(StatusCodes.NOT_IMPLEMENTED);
             }
         } catch (err) {
             if (err.message === 'NotImplemented') {
                 return { status: StatusCodes.NOT_IMPLEMENTED };
             }
+
+            if (err instanceof InvokeException) {
+                return err.createInvokeResponse();
+            }
+
             throw err;
         } finally {
             this.defaultNextEvent(context)();
@@ -488,24 +534,20 @@ export class ActivityHandler extends ActivityHandlerBase {
      * Overwrite this method to support channel-specific behavior across multiple channels.
      */
     protected async onSignInInvoke(context: TurnContext): Promise<void> {
-        throw new Error('NotImplemented');
+        throw new InvokeException(StatusCodes.NOT_IMPLEMENTED);
     }
 
     /**
-     * Handle _healthCheck invoke activity type_.
+     * Invoked when the bot is sent an Adaptive Card Action Execute.
      *
-     * @param context The context object for the current turn.
-     *
-     * @remarks
-     * Overwrite this method to customize or extended the built in healthCheck behavior.
+     * @param context the context object for the current turn
+     * @param invokeValue incoming activity value
      */
-    protected async onHealthCheck(context: TurnContext): Promise<HealthCheckResponse> {
-        const adapter = <any>context.adapter;
-        if (typeof adapter.healthCheck === 'function') {
-            return await adapter.healthCheck(context);
-        } else {
-            return { healthResults: { success: true, messages: ['Health check succeeded.'] } };
-        }
+    protected onAdaptiveCardInvoke(
+        context: TurnContext,
+        invokeValue: AdaptiveCardInvokeValue
+    ): Promise<AdaptiveCardInvokeResponse> {
+        return Promise.reject(new InvokeException(StatusCodes.NOT_IMPLEMENTED));
     }
 
     /**
@@ -556,6 +598,24 @@ export class ActivityHandler extends ActivityHandlerBase {
         await this.handle(context, 'InstallationUpdate', async () => {
             await this.dispatchInstallationUpdateActivity(context);
         });
+    }
+
+    /**
+     * Runs all registered _command_ handlers and then continues the event emission process.
+     *
+     * @param context The context object for the current turn.
+     */
+    protected async onCommandActivity(context: TurnContext): Promise<void> {
+        await this.handle(context, 'Command', this.defaultNextEvent(context));
+    }
+
+    /**
+     * Runs all registered _commandresult_ handlers and then continues the event emission process.
+     *
+     * @param context The context object for the current turn.
+     */
+    protected async onCommandResultActivity(context: TurnContext): Promise<void> {
+        await this.handle(context, 'CommandResult', this.defaultNextEvent(context));
     }
 
     /**
@@ -631,6 +691,50 @@ export class ActivityHandler extends ActivityHandlerBase {
      */
     protected async onUnrecognizedActivity(context: TurnContext): Promise<void> {
         await this.handle(context, 'UnrecognizedActivityType', this.defaultNextEvent(context));
+    }
+
+    private getAdaptiveCardInvokeValue(activity: Activity): AdaptiveCardInvokeValue {
+        const { value } = activity;
+        if (!value) {
+            const response = this.createAdaptiveCardInvokeErrorResponse(
+                StatusCodes.BAD_REQUEST,
+                'BadRequest',
+                'Missing value property'
+            );
+
+            throw new InvokeException(StatusCodes.BAD_REQUEST, response);
+        }
+
+        const { action, authentication, state } = value;
+        const { data, id: actionId, type, verb } = action ?? {};
+        const { connectionName, id: authenticationId, token } = authentication ?? {};
+
+        return {
+            action: {
+                data,
+                id: actionId,
+                type,
+                verb,
+            },
+            authentication: {
+                connectionName,
+                id: authenticationId,
+                token,
+            },
+            state,
+        };
+    }
+
+    private createAdaptiveCardInvokeErrorResponse(
+        statusCode: StatusCodes,
+        code: string,
+        message: string
+    ): AdaptiveCardInvokeResponse {
+        return {
+            statusCode,
+            type: 'application/vnd.microsoft.error',
+            value: { code, message },
+        };
     }
 
     /**

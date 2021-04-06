@@ -302,6 +302,27 @@ export class FunctionUtils {
     }
 
     /**
+     * Verify value contains elements or null.
+     * @param value Value to check.
+     * @param expression Expression that led to value.
+     * @returns Error or undefined if invalid.
+     */
+    public static verifyContainerOrNull(value: unknown, expression: Expression, _: number): string | undefined {
+        let error: string;
+        if (
+            value != null &&
+            !(typeof value === 'string') &&
+            !Array.isArray(value) &&
+            !(value instanceof Map) &&
+            !(typeof value === 'object')
+        ) {
+            error = `${expression} must be a string, list, map or object.`;
+        }
+
+        return error;
+    }
+
+    /**
      * Verify value is not null or undefined.
      * @param value Value to check.
      * @param expression Expression that led to value.
@@ -462,10 +483,7 @@ export class FunctionUtils {
      * @param verify Function to check each arg for validity.
      * @returns Delegate for evaluating an expression.
      */
-    public static apply(
-        func: (arg0: readonly unknown[]) => unknown,
-        verify?: VerifyExpression
-    ): EvaluateExpressionDelegate {
+    public static apply(func: (arg0: unknown[]) => unknown, verify?: VerifyExpression): EvaluateExpressionDelegate {
         return (expression: Expression, state: MemoryInterface, options: Options): ValueWithError => {
             let value: unknown;
             const { args, error: childrenError } = FunctionUtils.evaluateChildren(expression, state, options, verify);

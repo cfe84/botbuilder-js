@@ -1,21 +1,15 @@
-const { createHash } = require('crypto');
-const path = require('path');
 const nock = require('nock');
+const { ActivityTypes, MessageFactory, SkillConversationIdFactoryBase, TurnContext } = require('botbuilder-core');
+const { TestUtils } = require('..');
+const { createHash } = require('crypto');
+const { makeResourceExplorer } = require('./utils');
+
 const {
-    ActivityTypes,
-    ComponentRegistration,
-    MessageFactory,
-    SkillConversationIdFactoryBase,
-    TurnContext,
-} = require('botbuilder-core');
-const { ResourceExplorer } = require('botbuilder-dialogs-declarative');
-const { AdaptiveTestComponentRegistration, TestUtils } = require('../lib');
-const {
-    AdaptiveComponentRegistration,
-    LanguageGenerationComponentRegistration,
+    LanguageGenerationBotComponent,
     skillConversationIdFactoryKey,
     skillClientKey,
 } = require('botbuilder-dialogs-adaptive');
+
 class MockSkillConversationIdFactory extends SkillConversationIdFactoryBase {
     constructor(opts = { useCreateSkillConversationId: false }) {
         super();
@@ -113,17 +107,10 @@ class SetSkillBotFrameworkClientMiddleware {
 }
 
 describe('ActionTests', function () {
-    this.timeout(10000);
-
-    ComponentRegistration.add(new AdaptiveComponentRegistration());
-    ComponentRegistration.add(new LanguageGenerationComponentRegistration());
-    ComponentRegistration.add(new AdaptiveTestComponentRegistration());
-
-    const resourceExplorer = new ResourceExplorer().addFolder(
-        path.join(__dirname, 'resources/ActionTests'),
-        true,
-        false
-    );
+    let resourceExplorer;
+    before(function () {
+        resourceExplorer = makeResourceExplorer('ActionTests', LanguageGenerationBotComponent);
+    });
 
     it('AttachmentInput', async () => {
         await TestUtils.runTestScript(resourceExplorer, 'Action_AttachmentInput');
@@ -131,6 +118,18 @@ describe('ActionTests', function () {
 
     it('BeginDialog', async () => {
         await TestUtils.runTestScript(resourceExplorer, 'Action_BeginDialog');
+    });
+
+    it('BeginDialogWithExpr', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_BeginDialogWithExpr');
+    });
+
+    it('BeginDialogWithExpr2', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_BeginDialogWithExpr2');
+    });
+
+    it('BeginDialogWithExpr3', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_BeginDialogWithExpr3');
     });
 
     it('BeginDialogWithActivity', async () => {
@@ -187,6 +186,22 @@ describe('ActionTests', function () {
         await TestUtils.runTestScript(resourceExplorer, 'Action_ChoicesInMemory');
     });
 
+    it('ChoiceInputSimpleTemplate_en', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ChoiceInput_SimpleTemplate_en');
+    });
+
+    it('ChoiceInputSimpleTemplate_es', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ChoiceInput_SimpleTemplate_es');
+    });
+
+    it('ChoiceInputComplexTemplate_en', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ChoiceInput_ComplexTemplate_en');
+    });
+
+    it('ChoiceInputComplexTemplate_es', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ChoiceInput_ComplexTemplate_es');
+    });
+
     it('ChoiceStringInMemory', async () => {
         await TestUtils.runTestScript(resourceExplorer, 'Action_ChoiceStringInMemory');
     });
@@ -201,6 +216,22 @@ describe('ActionTests', function () {
 
     it('DatetimeInput', async () => {
         await TestUtils.runTestScript(resourceExplorer, 'Action_DatetimeInput');
+    });
+
+    it('ConfirmInputSimpleTemplate_en', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ConfirmInput_SimpleTemplate_en');
+    });
+
+    it('ConfirmInputComplexTemplate_en', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ConfirmInput_ComplexTemplate_en');
+    });
+
+    it('ConfirmInputSimpleTemplate_es', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ConfirmInput_SimpleTemplate_es');
+    });
+
+    it('ConfirmInputComplexTemplate_es', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_ConfirmInput_ComplexTemplate_es');
     });
 
     it('DeleteProperties', async () => {
@@ -347,6 +378,10 @@ describe('ActionTests', function () {
         await TestUtils.runTestScript(resourceExplorer, 'Action_SendActivity');
     });
 
+    it('SendActivityWithLGAlias', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_SendActivity_LGAlias');
+    });
+
     it('SetProperties', async () => {
         await TestUtils.runTestScript(resourceExplorer, 'Action_SetProperties');
     });
@@ -389,6 +424,10 @@ describe('ActionTests', function () {
 
     it('TextInputWithValueExpression', async () => {
         await TestUtils.runTestScript(resourceExplorer, 'Action_TextInputWithValueExpression');
+    });
+
+    it('TextInputWithInvalidResponse', async () => {
+        await TestUtils.runTestScript(resourceExplorer, 'Action_TextInputWithInvalidResponse');
     });
 
     it('TextInputWithNonStringInput', async () => {

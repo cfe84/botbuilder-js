@@ -8,7 +8,6 @@ import { Assertion, Nil, assert } from 'botbuilder-stdlib';
 export * from './activityInterfaces';
 export * from './activityEx';
 export { CallerIdConstants } from './callerIdConstants';
-export { HealthCheckResponse, HealthResults } from './healthCheck';
 export { SpeechConstants } from './speechConstants';
 export { TokenExchangeInvokeRequest } from './tokenExchangeInvokeRequest';
 
@@ -1947,6 +1946,8 @@ export enum ActivityTypes {
     Suggestion = 'suggestion',
     Trace = 'trace',
     Handoff = 'handoff',
+    Command = 'command',
+    CommandResult = 'commandResult',
 }
 
 /**
@@ -2118,6 +2119,7 @@ export enum Channels {
     Slack = 'slack',
     Sms = 'sms',
     Telegram = 'telegram',
+    Telephony = 'telephony',
     Test = 'test',
     Twilio = 'twilio-sms',
     Webchat = 'webchat',
@@ -2147,4 +2149,86 @@ export enum StatusCodes {
 export interface IStatusCodeError {
     statusCode: StatusCodes;
     message?: string;
+}
+
+/**
+ * Defines the structure that arrives in the Activity.Value.Authentication for Invoke
+ * activity with Name of 'adaptiveCard/action'.
+ */
+export interface AdaptiveCardAuthentication {
+    /**
+     * The id of this adaptive card invoke action value's 'authentication'.
+     */
+    id: string;
+    /**
+     * The connection name of the adaptive card authentication.
+     */
+    connectionName: string;
+    /**
+     * The token of the adaptive card authentication.
+     */
+    token: string;
+}
+
+/**
+ * Defines the structure that arrives in the Activity.Value.Action for Invoke
+ * activity with Name of 'adaptiveCard/action'.
+ */
+export interface AdaptiveCardInvokeAction {
+    /**
+     * The Type of this Adaptive Card Invoke Action.
+     */
+    type: string;
+    /**
+     * The id of this Adaptive Card Invoke Action.
+     */
+    id: string;
+    /**
+     * The Verb of this adaptive card action invoke.
+     */
+    verb: string;
+    /**
+     * The Data of this adaptive card action invoke.
+     */
+    data: Record<string, unknown>;
+}
+
+/**
+ * Defines the structure that is returned as the result of an Invoke activity with
+ * Name of 'adaptiveCard/action'.
+ */
+export interface AdaptiveCardInvokeResponse {
+    /**
+     * The Card Action response status code.
+     */
+    statusCode: number;
+    /**
+     * The type of this response.
+     */
+    type: string;
+    /**
+     * The json response object.
+     */
+    value: Record<string, unknown>;
+}
+
+/**
+ * Defines the structure that arrives in the Activity.Value for Invoke activity with
+ * Name of 'adaptiveCard/action'.
+ */
+export interface AdaptiveCardInvokeValue {
+    /**
+     * The [AdaptiveCardInvokeAction](xref:botframework-schema.AdaptiveCardInvokeAction) of
+     * this adaptive card invoke action value.
+     */
+    action: AdaptiveCardInvokeAction;
+    /**
+     * The [AdaptiveCardAuthentication](xref:botframework-schema.AdaptiveCardAuthentication)
+     * for this adaptive card invoke action value.
+     */
+    authentication: AdaptiveCardAuthentication;
+    /**
+     * The 'state' or magic code for an OAuth flow.
+     */
+    state: string;
 }

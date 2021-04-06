@@ -29,8 +29,6 @@ import {
     StatusCodes,
     TokenResponse,
     TurnContext,
-    HealthCheckResponse,
-    HealthResults,
     ActivityEventNames,
 } from 'botbuilder-core';
 
@@ -216,6 +214,8 @@ export class BotFrameworkAdapter
     private webSocketFactory: NodeWebSocketFactoryBase;
 
     private authConfiguration: AuthenticationConfiguration;
+
+    private namedPipeName?: string;
 
     /**
      * Creates a new instance of the [BotFrameworkAdapter](xref:botbuilder.BotFrameworkAdapter) class.
@@ -1834,26 +1834,6 @@ export class BotFrameworkAdapter
     }
 
     /**
-     * Invoked when the bot is sent a health check from the hosting infrastructure or, in the case of Skills the parent bot.
-     * @param context The [TurnContext](xref:botbuilder-core.TurnContext) for this turn.
-     *
-     * @returns The result of the health check.
-     */
-    public async healthCheck(context: TurnContext): Promise<HealthCheckResponse> {
-        const healthResults = <HealthResults>{
-            success: true,
-            'user-agent': USER_AGENT,
-            messages: ['Health check succeeded.'],
-        };
-        if (!(await this.credentialsProvider.isAuthenticationDisabled())) {
-            const credentials = context.turnState.get(this.ConnectorClientKey).credentials || this.credentials;
-            const token = await credentials.getToken();
-            healthResults.authorization = `Bearer ${token}`;
-        }
-        return { healthResults: healthResults };
-    }
-
-    /**
      * Connects the handler to a Named Pipe server and begins listening for incoming requests.
      * @param pipeName The name of the named pipe to use when creating the server.
      * @param logic The logic that will handle incoming requests.
@@ -1866,10 +1846,23 @@ export class BotFrameworkAdapter
             throw new Error('Bot logic needs to be provided to `useNamedPipe`');
         }
 
-        this.logic = logic;
+        if (this.isStreamingConnectionOpen) {
+            if (this.namedPipeName === pipeName) {
+                // Idempotent operation
+                return;
+            } else {
+                // BotFrameworkAdapters are scoped to one streaming connection.
+                // Switching streams is an advanced scenario, one not innately supported by the SDK.
+                // Each BotFrameworkAdapter instance is scoped to a stream, so switching streams
+                // results in dropped conversations that the bot cannot reconnect to.
+                throw new Error(
+                    `This BotFrameworkAdapter instance is already connected to a different stream. Use a new instance to connect to the provided pipeName.`
+                );
+            }
+        }
 
-        this.streamingServer = new NamedPipeServer(pipeName, this);
-        await this.streamingServer.start();
+        this.logic = logic;
+        await this.startNamedPipeServer(pipeName);
     }
 
     /**
@@ -1907,9 +1900,17 @@ export class BotFrameworkAdapter
         await this.startWebSocket(nodeWebSocket);
     }
 
-    /**
-     * @private
-     */
+    private async startNamedPipeServer(pipeName: string): Promise<void> {
+        this.namedPipeName = pipeName;
+        this.streamingServer = new NamedPipeServer(pipeName, this);
+
+        try {
+            await this.streamingServer.start();
+        } finally {
+            this.namedPipeName = undefined;
+        }
+    }
+
     private async authenticateConnection(req: WebRequest, channelService?: string): Promise<void> {
         if (!this.credentials.appId) {
             // auth is disabled
@@ -1940,17 +1941,11 @@ export class BotFrameworkAdapter
         await this.streamingServer.start();
     }
 
-    /**
-     * @private
-     */
     private async readRequestBodyAsString(request: IReceiveRequest): Promise<Activity> {
         const contentStream = request.streams[0];
         return await contentStream.readAsJson<Activity>();
     }
 
-    /**
-     * @private
-     */
     private async handleVersionRequest(
         request: IReceiveRequest,
         response: StreamingResponse

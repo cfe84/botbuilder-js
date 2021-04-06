@@ -6,14 +6,13 @@
  * Licensed under the MIT License.
  */
 
-export * from 'botframework-schema';
 export * from './activityFactory';
-export * from './adapterExtensions';
-export * from './coreAppCredentials';
 export * from './activityHandler';
 export * from './activityHandlerBase';
+export * from './adapterExtensions';
 export * from './autoSaveStateMiddleware';
 export * from './botAdapter';
+export * from './botComponent';
 export * from './botState';
 export * from './botStatePropertyAccessor';
 export * from './botStateSet';
@@ -22,9 +21,11 @@ export * from './browserStorage';
 export * from './cardFactory';
 export * from './componentRegistration';
 export * from './conversationState';
+export * from './coreAppCredentials';
 export * from './extendedUserTokenProvider';
 export * from './intentScore';
 export * from './invokeResponse';
+export * from './invokeException';
 export * from './memoryStorage';
 export * from './memoryTranscriptStore';
 export * from './messageFactory';
@@ -36,14 +37,6 @@ export * from './recognizerResult';
 export * from './registerClassMiddleware';
 export * from './showTypingMiddleware';
 export * from './signInConstants';
-export {
-    BotFrameworkSkill,
-    BotFrameworkClient,
-    SkillConversationIdFactoryBase,
-    SkillConversationReference,
-    SkillConversationReferenceKey,
-    SkillConversationIdFactoryOptions,
-} from './skills';
 export * from './skypeMentionNormalizeMiddleware';
 export * from './storage';
 export * from './stringUtils';
@@ -55,3 +48,14 @@ export * from './turnContextStateCollection';
 export * from './userState';
 export * from './userTokenProvider';
 export * from './userTokenSettings';
+export * from 'botframework-schema';
+
+export {
+    BotFrameworkClient,
+    BotFrameworkSkill,
+    SkillConversationIdFactory,
+    SkillConversationIdFactoryBase,
+    SkillConversationIdFactoryOptions,
+    SkillConversationReference,
+    SkillConversationReferenceKey,
+} from './skills';
