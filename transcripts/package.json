@@ -11,9 +11,9 @@
     "dependencies": {
         "@types/node": "^10.17.27",
         "@types/restify": "^8.4.2",
-        "botbuilder": "4.1.6",
-        "botbuilder-ai": "4.1.6",
-        "botbuilder-dialogs": "4.1.6"
+        "botbuilder": "4.14.0-local",
+        "botbuilder-ai": "4.14.0-local",
+        "botbuilder-dialogs": "4.14.0-local"
     },
     "devDependencies": {
         "mocha": "^6.2.3",

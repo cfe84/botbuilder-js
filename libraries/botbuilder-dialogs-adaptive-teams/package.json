@@ -2,7 +2,7 @@
   "name": "botbuilder-dialogs-adaptive-teams",
   "author": "Microsoft Corp.",
   "description": "Rule system for the Microsoft BotBuilder adaptive dialog system, with integration specific to Microsoft Teams.",
-  "version": "4.1.6",
+  "version": "4.14.0-local",
   "preview": true,
   "license": "MIT",
   "keywords": [
@@ -28,13 +28,13 @@
     }
   },
   "dependencies": {
-    "adaptive-expressions": "4.1.6",
-    "botbuilder": "4.1.6",
-    "botbuilder-dialogs": "4.1.6",
-    "botbuilder-dialogs-adaptive": "4.1.6",
-    "botbuilder-dialogs-declarative": "4.1.6",
-    "botbuilder-dialogs-adaptive-runtime-core": "4.1.6",
-    "botbuilder-stdlib": "4.1.6",
+    "adaptive-expressions": "4.14.0-local",
+    "botbuilder": "4.14.0-local",
+    "botbuilder-dialogs": "4.14.0-local",
+    "botbuilder-dialogs-adaptive": "4.14.0-local",
+    "botbuilder-dialogs-declarative": "4.14.0-local",
+    "botbuilder-dialogs-adaptive-runtime-core": "4.14.0-local",
+    "botbuilder-stdlib": "4.14.0-local",
     "lodash": "^4.17.19"
   },
   "devDependencies": {

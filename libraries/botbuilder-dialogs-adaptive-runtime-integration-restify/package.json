@@ -2,7 +2,7 @@
   "name": "botbuilder-dialogs-adaptive-runtime-integration-restify",
   "preview": true,
   "author": "Microsoft Corp.",
-  "version": "4.1.6",
+  "version": "4.14.0-local",
   "license": "MIT",
   "description": "Bot Framework Adaptive Dialogs runtime restify integration",
   "keywords": [
@@ -21,9 +21,9 @@
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "botbuilder": "4.1.6",
-    "botbuilder-dialogs-adaptive-runtime": "4.1.6",
-    "botbuilder-dialogs-adaptive-runtime-core": "4.1.6",
+    "botbuilder": "4.14.0-local",
+    "botbuilder-dialogs-adaptive-runtime": "4.14.0-local",
+    "botbuilder-dialogs-adaptive-runtime-core": "4.14.0-local",
     "restify": "^8.5.1",
     "runtypes": "~5.1.0"
   },

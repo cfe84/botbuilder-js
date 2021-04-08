@@ -19,7 +19,7 @@
     "@types/node-forge": "^0.9.5"
   },
   "dependencies": {
-    "botbuilder-stdlib": "4.1.6",
+    "botbuilder-stdlib": "4.14.0-local",
     "nanoid": "^3.1.20",
     "node-forge": "^0.10.0"
   }

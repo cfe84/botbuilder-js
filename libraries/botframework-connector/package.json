@@ -2,7 +2,7 @@
   "name": "botframework-connector",
   "author": "Microsoft Corp.",
   "description": "Bot Connector is autorest generated connector client.",
-  "version": "4.1.6",
+  "version": "4.14.0-local",
   "license": "MIT",
   "keywords": [
     "botconnector",
@@ -32,7 +32,7 @@
     "@types/node": "^10.17.27",
     "adal-node": "0.2.1",
     "base64url": "^3.0.0",
-    "botframework-schema": "4.1.6",
+    "botframework-schema": "4.14.0-local",
     "cross-fetch": "^3.0.5",
     "jsonwebtoken": "8.0.1",
     "rsa-pem-from-mod-exp": "^0.8.4"

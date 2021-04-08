@@ -2,7 +2,7 @@
   "name": "botbuilder-ai-orchestrator",
   "author": "Microsoft Corp.",
   "description": "Orchestrator recognizer",
-  "version": "4.1.6",
+  "version": "4.14.0-local",
   "preview": true,
   "license": "MIT",
   "keywords": [
@@ -27,12 +27,12 @@
     }
   },
   "dependencies": {
-    "adaptive-expressions": "4.1.6",
-    "botbuilder-core": "4.1.6",
-    "botbuilder-dialogs": "4.1.6",
-    "botbuilder-dialogs-adaptive": "4.1.6",
-    "botbuilder-dialogs-declarative": "4.1.6",
-    "botbuilder-dialogs-adaptive-runtime-core": "4.1.6",
+    "adaptive-expressions": "4.14.0-local",
+    "botbuilder-core": "4.14.0-local",
+    "botbuilder-dialogs": "4.14.0-local",
+    "botbuilder-dialogs-adaptive": "4.14.0-local",
+    "botbuilder-dialogs-declarative": "4.14.0-local",
+    "botbuilder-dialogs-adaptive-runtime-core": "4.14.0-local",
     "orchestrator-core": "rc",
     "uuid": "^8.3.2"
   },
