@@ -75,21 +75,22 @@ export class MicrosoftAppCredentials extends AppCredentials {
                 clientId: this.appId,
                 clientSecret: this.appPassword,
                 authority: this.oAuthEndpoint,
-            }
+                knownAuthorities: [this.oAuthEndpoint],
+            },
         });
-        // TODO save this to a member on Credentials -- might not be necessary?
-        let authRes: msal.AuthenticationResult;
-        // if (!this.refreshingToken) {
-            // currently keeping behavior the same as when we targeted ADAL
-            // right now we are always request all default scopes
-            // MSAL allows us to be more specific with scopes, if need be
-            // TODO look up how to do this again
-            const clientCredentialRequest = {
-                scopes: [this.oAuthScope + '/.default'],
-            };
 
-            authRes = await this.oAuthClient.acquireTokenByClientCredential(clientCredentialRequest);
-            console.log(`token from msal: ${authRes}`);
+        // if (!this.refreshingToken) {
+        // currently keeping behavior the same as when we targeted ADAL
+        // right now we are always request all default scopes
+        // MSAL allows us to be more specific with scopes, if need be
+        // TODO look up how to do this again
+        const clientCredentialRequest = {
+            scopes: [this.oAuthScope + '/.default'],
+        };
+
+        // TODO save this to a member on Credentials -- might not be necessary?
+        const authRes = await this.oAuthClient.acquireTokenByClientCredential(clientCredentialRequest);
+        // console.log(`token from msal:`, authRes);
         // }
 
         return authRes;
