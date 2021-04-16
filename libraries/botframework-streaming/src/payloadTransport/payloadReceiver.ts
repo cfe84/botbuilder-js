@@ -52,12 +52,16 @@ export class PayloadReceiver {
             // IMPORTANT - Remove.
             console.error('NamedPipeConnectionDebugging - PayloadReceiver.connect() should have thrown the "Already connected." error.');
             // throw new Error('Already connected.');
-        } else {
-            console.log('NamedPipeConnectionDebugging - PayloadReceiver connecting to new transport.');
-            this._receiver = receiver;
-            this.isConnected = true;
-            return this.runReceive();
         }
+        console.log('NamedPipeConnectionDebugging - PayloadReceiver connecting to new transport.');
+        this._receiver = receiver;
+        this.isConnected = true;
+        try {
+            return this.runReceive();
+        } finally {
+            console.log('NamedPipeConnectionDebugging - PayloadReceiver.connect() completed.');
+        }
+
     }
 
     /**
