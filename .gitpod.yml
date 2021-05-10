@@ -1,4 +1,4 @@
 tasks:
-  - init: npm install && npm run build
+  - init: yarn && yarn build
 image:
   file: .gitpod.Dockerfile
