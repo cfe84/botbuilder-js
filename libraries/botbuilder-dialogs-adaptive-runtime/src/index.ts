@@ -8,7 +8,7 @@ import { Configuration } from './configuration';
 
 import LuisBotComponent from 'botbuilder-ai-luis';
 import QnAMakerBotComponent from 'botbuilder-ai-qna';
-import { AdaptiveBotComponent, LanguageGenerationBotComponent } from 'botbuilder-dialogs-adaptive';
+import { AdaptiveBotComponent, LanguageGenerationBotComponent, LanguagePolicy } from 'botbuilder-dialogs-adaptive';
 import { ApplicationInsightsTelemetryClient, TelemetryInitializerMiddleware } from 'botbuilder-applicationinsights';
 import { BlobsStorage, BlobsTranscriptStore } from 'botbuilder-azure-blobs';
 import { ComponentDeclarativeTypes, ResourceExplorer } from 'botbuilder-dialogs-declarative';
@@ -24,6 +24,7 @@ import {
     ICredentialProvider,
     SimpleCredentialProvider,
     allowedCallersClaimsValidator,
+    BotFrameworkAuthentication,
 } from 'botframework-connector';
 
 import {
@@ -54,6 +55,7 @@ import {
     UserState,
     assertBotComponent,
 } from 'botbuilder';
+import { ConfigurationAdaptiveDialogBot } from './configurationAdaptiveDialogBot';
 
 function addFeatures(services: ServiceCollection, configuration: Configuration): void {
     services.composeFactory<
@@ -251,6 +253,9 @@ function addSkills(services: ServiceCollection, configuration: Configuration): v
 }
 
 function addCoreBot(services: ServiceCollection, configuration: Configuration): void {
+    // TODO fix
+    services.addFactory('languagePolicy', () => new LanguagePolicy());
+
     services.addFactory<
         ActivityHandlerBase,
         {
@@ -262,6 +267,7 @@ function addCoreBot(services: ServiceCollection, configuration: Configuration): 
             skillClient: SkillHttpClient;
             skillConversationIdFactory: SkillConversationIdFactoryBase;
             userState: UserState;
+            languagePolicy: LanguagePolicy;
         }
     >(
         'bot',
@@ -274,19 +280,21 @@ function addCoreBot(services: ServiceCollection, configuration: Configuration): 
             'skillClient',
             'skillConversationIdFactory',
             'userState',
+            'languagePolicy',
         ],
         (dependencies) =>
-            new CoreBot(
+            new ConfigurationAdaptiveDialogBot(
+                configuration,
                 dependencies.resourceExplorer,
-                dependencies.userState,
                 dependencies.conversationState,
-                dependencies.skillClient,
+                dependencies.userState,
                 dependencies.skillConversationIdFactory,
+                dependencies.languagePolicy,
+                new BotFrameworkAuthentication(), //TODO extract, may depend on steven gumm's work
                 dependencies.botTelemetryClient,
-                configuration.string(['defaultLocale']) ?? 'en-us',
-                configuration.string(['defaultRootDialog']) ?? 'main.dialog',
                 dependencies.memoryScopes,
-                dependencies.pathResolvers
+                dependencies.pathResolvers,
+                [] // TODO extract,
             )
     );
 
