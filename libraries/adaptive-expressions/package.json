@@ -42,11 +42,26 @@
     "xpath": "^0.0.32"
   },
   "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-decorators": "^7.6.0",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-typescript": "^7.6.0",
+    "@babel/runtime": "^7.6.3",
     "@types/jspath": "^0.4.0",
+    "@types/webpack-bundle-analyzer": "^4.4.0",
     "antlr4ts-cli": "0.5.0-alpha.3",
-    "typescript": "3.5.3"
+    "terser-webpack-plugin": "^4.2.3",
+    "typescript": "3.5.3",
+    "webpack-bundle-analyzer": "^4.4.2",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "babel-loader": "^8.0.6",
+    "ts-loader": "^7.0.5"
   },
   "scripts": {
+    "a": "webpack",
     "build:src": "tsc -b",
     "build:tests": "tsc -p tests/tsconfig.json",
     "build": "npm-run-all build:src build:tests",
