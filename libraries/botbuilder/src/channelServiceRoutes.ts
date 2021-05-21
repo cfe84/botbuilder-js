@@ -8,7 +8,7 @@
 
 import { Activity, AttachmentData, ConversationParameters, StatusCodes, Transcript } from 'botbuilder-core';
 
-import { ChannelServiceHandler } from './channelServiceHandler';
+import { ChannelServiceHandlerBase } from './channelServiceHandlerBase';
 import { StatusCodeError } from './statusCodeError';
 import { WebRequest, WebResponse } from './interfaces';
 
@@ -39,9 +39,7 @@ export class ChannelServiceRoutes {
     /**
      * @param channelServiceHandler
      */
-    constructor(private readonly channelServiceHandler: ChannelServiceHandler) {
-        this.channelServiceHandler = channelServiceHandler;
-    }
+    constructor(private readonly channelServiceHandler: ChannelServiceHandlerBase) {}
 
     /**
      * Registers all Channel Service paths on the provided WebServer.
