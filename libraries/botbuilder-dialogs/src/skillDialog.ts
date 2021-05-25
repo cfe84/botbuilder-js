@@ -83,6 +83,10 @@ export class SkillDialog extends Dialog<Partial<BeginSkillDialogOptions>> {
             true
         ) as Activity;
 
+        if (skillActivity.serviceUrl.startsWith('urn:')) {
+            skillActivity.deliveryMode ??= DeliveryModes.ExpectReplies;
+        }
+
         // Store delivery mode and connection name in dialog state for later use.
         dc.activeDialog.state[this.DeliveryModeStateKey] = dialogArgs.activity.deliveryMode;
 
