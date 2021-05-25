@@ -8,6 +8,7 @@ import { BotLogic, BotLogicT, Request, Response, ResponseT } from './interfaces'
 import { CloudAdapterBase } from './cloudAdapterBase';
 import { HttpClient, HttpHeaders, HttpOperationResponse, WebResource } from '@azure/ms-rest-js';
 import { INodeBufferT, INodeSocketT } from './runtypes';
+import { retry } from 'botbuilder-stdlib';
 import { validateAndFixActivity } from './activityValidator';
 
 import {
@@ -142,13 +143,15 @@ export class CloudAdapter extends CloudAdapterBase implements BotFrameworkHttpAd
      * @param appId The Bot application ID
      * @param audience The audience to use for outbound communication. The will vary by cloud environment.
      * @param callerId Optional, the caller ID
+     * @param retryCount Optional, the number of times to retry a failed connection (defaults to 7)
      */
     async connectNamedPipe(
         pipeName: string,
         logic: BotLogic,
         appId: string,
         audience: string,
-        callerId?: string
+        callerId?: string,
+        retryCount = 7
     ): Promise<void> {
         t.Record({
             pipeName: t.String,
@@ -171,14 +174,14 @@ export class CloudAdapter extends CloudAdapterBase implements BotFrameworkHttpAd
             (authenticateRequestResult, activity) => this.processActivity(authenticateRequestResult, activity, logic)
         );
 
-        // Create server (TODO(jpg) retries)
+        // Create server
         const server = new NamedPipeServer(pipeName, requestHandler);
 
         // Attach server to request handler for outbound requests
         requestHandler.server = server;
 
         // Spin it up
-        await server.start();
+        await retry(() => server.start(), retryCount);
     }
 
     private async connect(req: Request, socket: INodeSocket, head: INodeBuffer, logic: BotLogic): Promise<void> {
