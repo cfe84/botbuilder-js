@@ -334,12 +334,18 @@ class StreamingHttpClient implements HttpClient {
         return request;
     }
 
-    private createHttpResponse(receiveResponse: IReceiveResponse, httpRequest: WebResource): HttpOperationResponse {
+    private async createHttpResponse(
+        receiveResponse: IReceiveResponse,
+        httpRequest: WebResource
+    ): Promise<HttpOperationResponse> {
+        const [bodyAsText] =
+            (await Promise.all(receiveResponse.streams?.map((stream) => stream.readAsString()) ?? [])) ?? [];
+
         return {
-            status: receiveResponse.statusCode,
-            request: httpRequest,
+            bodyAsText,
             headers: new HttpHeaders(),
-            // TODO(jpg): response body?
+            request: httpRequest,
+            status: receiveResponse.statusCode,
         };
     }
 }
