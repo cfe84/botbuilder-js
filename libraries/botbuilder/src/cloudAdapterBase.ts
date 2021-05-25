@@ -65,7 +65,7 @@ export abstract class CloudAdapterBase extends BotAdapter {
         return Promise.all(
             activities.map(async (activity) => {
                 // TODO(jpg) why are we explicitly removing the ID?
-                // delete activity.id;
+                delete activity.id;
 
                 if (activity.type === 'delay') {
                     await delay(typeof activity.value === 'number' ? activity.value : 1000);
@@ -335,7 +335,9 @@ export abstract class CloudAdapterBase extends BotAdapter {
         if (context.activity.deliveryMode === DeliveryModes.ExpectReplies) {
             return {
                 status: StatusCodes.OK,
-                body: context.bufferedReplyActivities,
+                body: {
+                    activities: context.bufferedReplyActivities,
+                },
             };
         }
 
