@@ -122,7 +122,7 @@ export class CloudAdapter extends CloudAdapterBase implements BotFrameworkHttpAd
             return end(StatusCodes.BAD_REQUEST);
         }
 
-        const authHeader = t.Optional(t.String).check(req.headers.Authorization ?? req.headers.authorization);
+        const authHeader = t.String.check(req.headers.Authorization ?? req.headers.authorization ?? '');
 
         try {
             const invokeResponse = await this.processActivity(authHeader, activity, logic);
@@ -130,7 +130,7 @@ export class CloudAdapter extends CloudAdapterBase implements BotFrameworkHttpAd
         } catch (err) {
             return end(
                 err instanceof AuthenticationError ? StatusCodes.UNAUTHORIZED : StatusCodes.INTERNAL_SERVER_ERROR,
-                err
+                err.message ?? err
             );
         }
     }
@@ -186,7 +186,7 @@ export class CloudAdapter extends CloudAdapterBase implements BotFrameworkHttpAd
 
     private async connect(req: Request, socket: INodeSocket, head: INodeBuffer, logic: BotLogic): Promise<void> {
         // Grab the auth header from the inbound http request
-        const authHeader = t.Optional(t.String).check(req.headers.Authorization ?? req.headers.authorization);
+        const authHeader = t.String.check(req.headers.Authorization ?? req.headers.authorization ?? '');
 
         // Grab the channelId which should be in the http headers
         const channelIdHeader = t.Optional(t.String).check(req.headers.channelid);
@@ -282,7 +282,7 @@ class StreamingRequestHandler extends RequestHandler {
             const invokeResponse = await this.processActivity(this.authenticateRequestResult, activity);
             return end(invokeResponse?.status ?? StatusCodes.OK, invokeResponse?.body);
         } catch (err) {
-            return end(StatusCodes.INTERNAL_SERVER_ERROR, err);
+            return end(StatusCodes.INTERNAL_SERVER_ERROR, err.message ?? err);
         }
     }
 }

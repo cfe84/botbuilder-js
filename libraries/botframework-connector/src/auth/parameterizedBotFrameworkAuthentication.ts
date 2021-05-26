@@ -138,13 +138,14 @@ export class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
         );
     }
 
-    static getAppId(claimsIdentity: ClaimsIdentity): string | null {
+    static getAppId(claimsIdentity: ClaimsIdentity): string {
         // For requests from channel App Id is in Audience claim of JWT token. For emulator it is in AppId claim. For
         // unauthenticated requests we have anonymous claimsIdentity provided auth is disabled.
         // For Activities coming from Emulator AppId claim contains the Bot's AAD AppId.
         return (
             claimsIdentity.getClaimValue(AuthenticationConstants.AudienceClaim) ??
-            claimsIdentity.getClaimValue(AuthenticationConstants.AppIdClaim)
+            claimsIdentity.getClaimValue(AuthenticationConstants.AppIdClaim) ??
+            ''
         );
     }
 

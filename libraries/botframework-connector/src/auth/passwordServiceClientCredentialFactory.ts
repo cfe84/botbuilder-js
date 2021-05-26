@@ -34,7 +34,7 @@ export class PasswordServiceClientCredentialFactory implements ServiceClientCred
         loginEndpoint: string,
         validateAuthority: boolean
     ): Promise<ServiceClientCredentials> {
-        if (!await this.isValidAppId(appId)) {
+        if (!(await this.isValidAppId(appId))) {
             throw new Error('appId did not match');
         }
 
